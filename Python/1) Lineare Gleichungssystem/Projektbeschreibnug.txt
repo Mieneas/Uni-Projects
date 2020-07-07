@@ -1,0 +1,7 @@
+Hier wird implementiert, ein Linearen Gleichungssystem durch Gauß-Elimination und  Cholesky-Zerlegung zu lösen.
+Hier wird auch den Rekonstruktionsschritt eines Tomographen implementiert, welcher die (logarithmischen) Dichten
+in den Zellen eines 2D-Volumens bestimmt. Diese Dichten können als ein
+sogenanntes tomographisches Bild dargestellt werden, siehe Abbildung 3.
+
+
+Ich habe nur die Abschnitte implementiert, die mit @TODO vermerkt sind, sowie auch viele Funktionen, die innerhlab der TOFO Funktionen verwendt werden.

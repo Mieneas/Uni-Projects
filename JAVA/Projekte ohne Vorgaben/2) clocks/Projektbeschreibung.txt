@@ -1,0 +1,4 @@
+In dieser projekt untersuchen wir, wie Knoten in einem verteilten System
+eine bestimmte Reihenfolge von Nachrichten Vereinbaren  können, ohne sich auf physische Uhren zu verlassen. Das
+Herausforderungen, die mit dieser Übung angegangen werden, basieren auf grundlegenden Problemen
+mit verteilten Systemen.

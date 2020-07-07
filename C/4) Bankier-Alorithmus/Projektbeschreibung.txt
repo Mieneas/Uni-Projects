@@ -1,0 +1,3 @@
+Hier wurde den Bankier-Algorithmus implementiert.
+
+Einzelarbeit

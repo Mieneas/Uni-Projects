@@ -1,0 +1,3 @@
+Einzelarbeit.
+
+Hier werden die die Verfahren: SJN (nicht praemptiv), LCFS, SRTN, RR und MLF implementiert.

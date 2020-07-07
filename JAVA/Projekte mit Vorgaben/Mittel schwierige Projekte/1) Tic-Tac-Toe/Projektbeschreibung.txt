@@ -1,0 +1,6 @@
+Hier wird ein Programm geschrieben, das beliebige Stellung im Tic-Tac-Toe Spiel bewertet.
+Bei Gewinnpositionen ist zu berücksichtigen, nach wieviel Zügen der Gewinn (bei optimal spielender
+Gegnerin) erreicht werden kann. Analoges gilt für Verlustpositionen.
+
+Die Implementation kann beliebige n × n Bretter zulassen, wobei n ≤ 10 vorausgesetzt ist
+und das Spiel gewonnen ist, wenn n gleiche Steine eine Reihe bilden.

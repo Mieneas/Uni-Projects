@@ -1,0 +1,17 @@
+Bei der inhaltsabhängigen Bildskalierung (content-aware image resizing oder seam carving) wird
+eine der beiden Bilddimensionen so verkleinert, dass die wesentlichen Bildelemente möglichst nicht
+verändert werden, siehe Abbildung 1. Für die horizontale Stauchung werden iterativ Pfade von der
+oberen zur unteren Bildkante gesucht und aus dem Bild gelöscht, die das Überschreiten von Kontrastgrenzen möglichst vermeiden.
+
+Die inhaltsabhängige Bildskalierung wird hier mit Hilfe von kürzesten Wegen in einem azyklischen
+gerichteten Graphen (DAG) realisiert. Dazu wird das Bild durch einen Gridgraphen repräsentiert, bei
+dem die Knoten Bildpunkte darstellen, siehe Abbildung 4. Für eine horizontale Skalierung werden
+iterative Pfade aus dem Bild herausgelöscht, die von der oberen zur unteren Bildkante verlaufen und
+auf ihrem Weg Kontrastüberschreitungen (von einem Pixel zum nächsten) minimieren. Zu diesem
+Zweck werden die Kantengewichte als Kontrast zwischen den jeweiligen Pixeln definiert. Von jedem
+Knoten verlaufen Kanten zu den drei Nachbarknoten in der darunterliegenden Zeile.
+Da die gesuchten Pfade von einem beliebigen Knoten der obsten Zeile starten können, und das Ziel
+ein beliegiber Knoten der unteresten Zeile ist, muss man sich eines kleinen Tricks bedienen. Man
+fügt einen Startknoten zu dem Gridgraphen hinzu und lässt von ihm aus Kanten zu allen Knoten der
+obersten Zeile verlaufen. Ebenso fügt man einen Endknoten ein zu dem Kanten von allen Knoten der
+unteresten Zeile verlaufen. Alle diese zusätzlichen Kanten erhalten das Gewicht 0.

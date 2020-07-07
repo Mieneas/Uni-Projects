@@ -1,0 +1,10 @@
+In dieser Aufgabe wird mit Datenstrukturen, copy constructors und Java Collections gearbeitet.
+Es wird eine kleine WG-Küche aufgeräumt.
+
+Verdeutlichen Sie sich die Aufgabe an folgendem einfachen Beispiel: Sie haben 5 Tassen, Sie brauchen 3.
+Sie haben eine Abstellkammer in die Sie Dinge, die Sie nicht brauchen, stellen können.
+In diesem Fall 2 Tassen. Wenn Ihnen dann eine Tasse kaputt geht, haben Sie noch eine in der Abstellkammer.
+Sie können diese also ersetzen. Wenn Sie keine Tassen haben, brauchen Sie diese auch nicht
+aufräumen. Ihre Abstellkammer ist für diese Aufgabe ein Stack. Sie ist aber nicht unbedingt sinvoll
+gepackt, d.h. es könnte Freiräume geben, in denen nichts steht, obwohl danach noch weitere Sachen
+reingestellt wurden. Diese Freiräume sind mit null belegt.

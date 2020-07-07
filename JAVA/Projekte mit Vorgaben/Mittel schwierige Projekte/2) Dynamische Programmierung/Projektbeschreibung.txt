@@ -1,0 +1,5 @@
+Zwei Personen spielen folgendes Spiel. Es gibt eine (meist gerade) Anzahl von Schüsseln mit
+Murmeln. Die Murmelanzahl in jeder Schüssel ist von Anfang an bekannt. Abwechseln wählen
+die Spieler eine der beiden äußeren Schüsseln aus und nehmen die darin befindlichen Murmeln.
+Am Ende bekommt jeder Spieler die Differenz der Anzahl der eigenen Murmeln und der Murmeln des
+Gegenspielers, siehe Abbildung 1. Ziel dieser Aufgabe ist es, eine optimale Strategie zu finden.

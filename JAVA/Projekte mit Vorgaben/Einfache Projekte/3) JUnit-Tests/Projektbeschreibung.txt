@@ -1,0 +1,2 @@
+Das Ziel dieser Aufgabe ist die Entwicklung von JUnit Tests.
+Die zu testende Klasse benutzt Backtracking, um alle fixpunktfreien Permutationen (oder Derangements) einer Zahlenfolge zu bestimmen.

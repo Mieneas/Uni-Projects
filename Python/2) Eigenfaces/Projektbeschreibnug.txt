@@ -1,0 +1,3 @@
+Ziel der Aufgabe ist es, den Eigenface-Algorithmus zur Gesichtserkennung zu implementieren
+
+Ich habe nur die Abschnitte implementiert, die mit @TODO vermerkt sind, sowie auch viele Funktionen, die innerhlab der TOFO Funktionen verwendt werden.

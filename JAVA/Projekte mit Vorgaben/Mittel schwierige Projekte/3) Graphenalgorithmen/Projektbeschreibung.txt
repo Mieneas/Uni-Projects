@@ -1,0 +1,5 @@
+In dieser Aufgabe werden Sie mithilfe des Tiefensuche (DFS) Algorithmus ein randomisiertes Labyrinth erstellen
+und lösen. Das Labyrinth wird repräsentiert von einem Graphen mit V = N
+2 Knoten, die in einem quadratischen Gitter angeordnet sind (siehe Figure 1), und den dazwischen liegenden Kanten. Die
+Knoten sind hierbei die Kreuzungspunkte und die Kanten die direkten Verbindungen zwischen den
+Kreuzungspunkten. Die Kanten sind also die Wege im Labyrinth.

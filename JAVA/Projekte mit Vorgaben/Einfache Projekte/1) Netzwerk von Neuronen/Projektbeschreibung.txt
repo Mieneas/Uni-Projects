@@ -1,0 +1,2 @@
+Hier wird ein Netzwerk von Neuronen implementieren, welches die Verarbeitung von Farben im
+Gehirn modelliert.

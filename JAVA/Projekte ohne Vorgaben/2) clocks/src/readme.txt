@@ -1,0 +1,1 @@
+Dieser Aufgabe ist eine Gruppenarbeit: meine Rolle war die LamportTimeStamp-algorithmus zu implementieren.

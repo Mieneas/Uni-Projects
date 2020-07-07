@@ -1,0 +1,24 @@
+Einzelarbeit.
+
+In dieser Aufgabe geht es um eine Backerei, die sich ausschließlich auf Muffins spezialisiert hat. In der Vor- ¨
+gabe finden Sie ein lauffahiges Programm, welches aber nicht korrekt funktioniert. Ihre Aufgabe wird es ¨
+sein die kritischen Bereiche des Programms mit Mutexen abzusichern und die Threads zu synchronisieren.
+In der Vorgabe befinden sich 6 C-Dateien: bakery.c, management.c, order.c, supplier.c, warehouse.c,
+worker.c.
+
+Ablauf des Programms:
+Die Bäckerei hat ein Management, welches neue Aufträge aus der Datei orders.txt einließt. Diese Datei
+enthält den Namen des Auftraggebers sowie die Anzahl der bestellten Muffins. Das Management legt die
+Aufträge in dem Ringbuffer (orders_in) ab und beendet sich nachdem alle Auftrage eingelesen oder die
+maximale Anzahl der Aufträge (MAX_ORDERS) erreicht ist. Desweiteren besitzt die Bäckerei ein Lager
+(warehouse) in diesem sind die Zutaten als Integer-Werte gespeichert und repräsentieren die Menge der
+Zutaten in Gramm. Es gibt eine Spedition (forwarding agent) die Lieferanten (supplier) beauftragt, die für
+den Zutatennachschub sorgen. In diesem Fall sind es 3 supplier threads; für jede Zutat jeweils einen. Zuletzt
+gibt es noch die Bäcker (worker). Die Bäckerei erzeugt eine Anzahl an worker threads, die in der Konstanten num_worker_threads angegeben ist.
+Die Bäcker holen sich jeweils einen Auftrag vom Management,
+beararbeiten diesen, indem sie aus dem Lager die benötigten Zutaten holen. Wenn sie einen Auftrag erledigt
+haben, legen sie den bearbeiteten Auftrag in dem Array orders_finished des Managements ab und holen
+sich einen neuen Auftrag. Wenn keine Aufträge mehr vorhanden sind, beenden die Bäcker ihre Arbeit. Danach
+werden die erstellten Datenstukturen der Bäckerei gelöscht. In der Funktion management_destroy
+wird der forwarding agent thread benachrichtigt, die Arbeit der Lieferanten anzuhalten. Abschließend wird
+eine Zusammenfassung der bearbeiteten Auftrage auf der Konsole ausgegeben.
