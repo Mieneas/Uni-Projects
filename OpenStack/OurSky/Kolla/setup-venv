@@ -1,0 +1,12 @@
+#!/bin/bash
+
+which deactivate && deactivate
+
+if python -m venv $1; then
+	. venv/bin/activate
+	pip install -U pip
+	pip install -r requirements.txt
+else
+	echo "Failed to setup virtual environment."
+	exit 1
+fi

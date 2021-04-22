@@ -1,0 +1,121 @@
+## /var/log/kolla/mariadb/mariadb.log ##
+
+2021-01-19 23:58:26 6 [Warning] Failed to load slave replication state from table mysql.gtid_slave_pos: 1017: Can't find file: './mysql/' (errno: 2 "No such file or directory")
+2021-01-19 23:58:33 0 [Note] InnoDB: Using Linux native AIO
+2021-01-19 23:58:33 0 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2021-01-19 23:58:33 0 [Note] InnoDB: Uses event mutexes
+2021-01-19 23:58:33 0 [Note] InnoDB: Compressed tables use zlib 1.2.11
+2021-01-19 23:58:33 0 [Note] InnoDB: Number of pools: 1
+2021-01-19 23:58:33 0 [Note] InnoDB: Using SSE2 crc32 instructions
+2021-01-19 23:58:33 0 [Note] InnoDB: Initializing buffer pool, total size = 7G, instances = 8, chunk size = 128M
+2021-01-19 23:58:33 0 [Note] InnoDB: Completed initialization of buffer pool
+2021-01-19 23:58:33 0 [Note] InnoDB: If the mysqld execution user is authorized, page cleaner thread priority can be changed. See the man page of setpriority().
+2021-01-19 23:58:33 0 [Note] InnoDB: 128 out of 128 rollback segments are active.
+2021-01-19 23:58:33 0 [Note] InnoDB: Creating shared tablespace for temporary tables
+2021-01-19 23:58:33 0 [Note] InnoDB: Setting file './ibtmp1' size to 12 MB. Physically writing the file full; Please wait ...
+2021-01-19 23:58:33 0 [Note] InnoDB: File './ibtmp1' size is now 12 MB.
+2021-01-19 23:58:33 0 [Note] InnoDB: Waiting for purge to start
+2021-01-19 23:58:33 0 [Note] InnoDB: 10.3.27 started; log sequence number 1625595; transaction id 20
+2021-01-19 23:58:33 0 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
+2021-01-19 23:58:33 0 [Note] Plugin 'FEEDBACK' is disabled.
+2021-01-19 23:58:33 0 [Note] InnoDB: Buffer pool(s) load completed at 210119 23:58:33
+2021-01-19 23:58:33 0 [Note] Reading of all Master_info entries succeeded
+2021-01-19 23:58:33 0 [Note] Added new Master_info '' to hash table
+2021-01-19 23:58:33 0 [Note] /usr/sbin/mysqld: ready for connections.
+Version: '10.3.27-MariaDB-1:10.3.27+maria~bionic-log'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  mariadb.org binary distribution
+2021-01-19 23:58:34 0 [Note] /usr/sbin/mysqld (initiated by: root[root] @ localhost []): Normal shutdown
+2021-01-19 23:58:34 0 [Note] Event Scheduler: Purging the queue. 0 events
+2021-01-19 23:58:34 0 [Note] InnoDB: FTS optimize thread exiting.
+2021-01-19 23:58:34 0 [Note] InnoDB: Starting shutdown...
+2021-01-19 23:58:34 0 [Note] InnoDB: Dumping buffer pool(s) to /var/lib/mysql/ib_buffer_pool
+2021-01-19 23:58:34 0 [Note] InnoDB: Buffer pool(s) dump completed at 210119 23:58:34
+2021-01-19 23:58:35 0 [Note] InnoDB: Shutdown completed; log sequence number 1625620; transaction id 23
+2021-01-19 23:58:35 0 [Note] InnoDB: Removed temporary tablespace data file: "ibtmp1"
+2021-01-19 23:58:35 0 [Note] /usr/sbin/mysqld: Shutdown complete
+
+2021-01-19 23:58:43 0 [Note] WSREP: Read nil XID from storage engines, skipping position init
+2021-01-19 23:58:43 0 [Note] WSREP: wsrep_load(): loading provider library '/usr/lib/galera/libgalera_smm.so'
+2021-01-19 23:58:43 0 [Note] WSREP: wsrep_load(): Galera 25.3.31(r0ede97d4) by Codership Oy <info@codership.com> loaded successfully.
+2021-01-19 23:58:43 0 [Note] WSREP: CRC-32C: using 64-bit x86 acceleration.
+2021-01-19 23:58:43 0 [Warning] WSREP: Could not open state file for reading: '/var/lib/mysql//grastate.dat'
+2021-01-19 23:58:43 0 [Note] WSREP: Found saved state: 00000000-0000-0000-0000-000000000000:-1, safe_to_bootstrap: 1
+2021-01-19 23:58:44 0 [Note] WSREP: Passing config to GCS: base_dir = /var/lib/mysql/; base_host = 130.149.249.145; base_port = 4567; cert.log_conflicts = no; cert.optimistic_pa = yes; debug = no; evs.auto_evict = 0; evs.delay_margin = PT1S; evs.delayed_keep_period = PT30S; evs.inactive_check_period = PT0.5S; evs.inactive_timeout = PT15S; evs.join_retrans_period = PT1S; evs.max_install_timeouts = 3; evs.send_window = 4; evs.stats_report_period = PT1M; evs.suspect_timeout = PT5S; evs.user_send_window = 2; evs.view_forget_timeout = PT24H; gcache.dir = /var/lib/mysql/; gcache.keep_pages_size = 0; gcache.mem_size = 0; gcache.name = /var/lib/mysql//galera.cache; gcache.page_size = 128M; gcache.recover = no; gcache.size = 128M; gcomm.thread_prio = ; gcs.fc_debug = 0; gcs.fc_factor = 1.0; gcs.fc_limit = 16; gcs.fc_master_slave = no; gcs.max_packet_size = 64500; gcs.max_throttle = 0.25; gcs.recv_q_hard_limit = 9223372036854775807; gcs.recv_q_soft_limit = 0.25; gcs.sync_donor = no; gmcast.listen_addr = tcp://130.149.249.145:4567; gmcast.segment 
+2021-01-19 23:58:44 0 [Note] WSREP: GCache history reset: 00000000-0000-0000-0000-000000000000:0 -> 00000000-0000-0000-0000-000000000000:-1
+2021-01-19 23:58:44 0 [Note] WSREP: Assign initial position for certification: -1, protocol version: -1
+2021-01-19 23:58:44 0 [Note] WSREP: wsrep_sst_grab()
+2021-01-19 23:58:44 0 [Note] WSREP: Start replication
+2021-01-19 23:58:44 0 [Note] WSREP: 'wsrep-new-cluster' option used, bootstrapping the cluster
+2021-01-19 23:58:44 0 [Note] WSREP: Setting initial position to 00000000-0000-0000-0000-000000000000:-1
+2021-01-19 23:58:44 0 [Note] WSREP: protonet asio version 0
+2021-01-19 23:58:44 0 [Note] WSREP: Using CRC-32C for message checksums.
+2021-01-19 23:58:44 0 [Note] WSREP: backend: asio
+2021-01-19 23:58:44 0 [Note] WSREP: gcomm thread scheduling priority set to other:0 
+2021-01-19 23:58:44 0 [Warning] WSREP: access file(/var/lib/mysql//gvwstate.dat) failed(No such file or directory)
+2021-01-19 23:58:44 0 [Note] WSREP: restore pc from disk failed
+2021-01-19 23:58:44 0 [Note] WSREP: GMCast version 0
+2021-01-19 23:58:44 0 [Note] WSREP: (e14f5b96, 'tcp://130.149.249.145:4567') listening at tcp://130.149.249.145:4567
+2021-01-19 23:58:44 0 [Note] WSREP: (e14f5b96, 'tcp://130.149.249.145:4567') multicast: , ttl: 1
+2021-01-19 23:58:44 0 [Note] WSREP: EVS version 0
+2021-01-19 23:58:44 0 [Note] WSREP: gcomm: bootstrapping new group 'openstack'
+2021-01-19 23:58:44 0 [Note] WSREP: start_prim is enabled, turn off pc_recovery
+2021-01-19 23:58:44 0 [Note] WSREP: Node e14f5b96 state prim
+2021-01-19 23:58:44 0 [Note] WSREP: view(view_id(PRIM,e14f5b96,1) memb {
+	e14f5b96,0
+} joined {
+} left {
+} partitioned {
+})
+2021-01-19 23:58:44 0 [Note] WSREP: save pc into disk
+2021-01-19 23:58:44 0 [Note] WSREP: gcomm: connected
+2021-01-19 23:58:44 0 [Note] WSREP: Changing maximum packet size to 64500, resulting msg size: 32636
+2021-01-19 23:58:44 0 [Note] WSREP: Shifting CLOSED -> OPEN (TO: 0)
+2021-01-19 23:58:44 0 [Note] WSREP: Opened channel 'openstack'
+2021-01-19 23:58:44 0 [Note] WSREP: New COMPONENT: primary = yes, bootstrap = no, my_idx = 0, memb_num = 1
+2021-01-19 23:58:44 0 [Note] WSREP: Waiting for SST to complete.
+2021-01-19 23:58:44 0 [Note] WSREP: Starting new group from scratch: e153e6d4-5aa9-11eb-ac5a-a2b22fe0d2dc
+2021-01-19 23:58:44 0 [Note] WSREP: STATE_EXCHANGE: sent state UUID: e153e92c-5aa9-11eb-84bc-0ec43773fa1f
+2021-01-19 23:58:44 0 [Note] WSREP: STATE EXCHANGE: sent state msg: e153e92c-5aa9-11eb-84bc-0ec43773fa1f
+2021-01-19 23:58:44 0 [Note] WSREP: STATE EXCHANGE: got state msg: e153e92c-5aa9-11eb-84bc-0ec43773fa1f from 0 (wally135)
+2021-01-19 23:58:44 0 [Note] WSREP: Quorum results:
+	version    = 6,
+	component  = PRIMARY,
+	conf_id    = 0,
+	members    = 1/1 (joined/total),
+	act_id     = 0,
+	last_appl. = -1,
+	protocols  = 0/9/3 (gcs/repl/appl),
+	group UUID = e153e6d4-5aa9-11eb-ac5a-a2b22fe0d2dc
+2021-01-19 23:58:44 0 [Note] WSREP: Flow-control interval: [16, 16]
+2021-01-19 23:58:44 0 [Note] WSREP: Restored state OPEN -> JOINED (0)
+2021-01-19 23:58:44 0 [Note] WSREP: Member 0.0 (wally135) synced with group.
+2021-01-19 23:58:44 0 [Note] WSREP: Shifting JOINED -> SYNCED (TO: 0)
+2021-01-19 23:58:44 1 [Note] WSREP: REPL Protocols: 9 (4, 2)
+2021-01-19 23:58:44 1 [Note] WSREP: New cluster view: global state: e153e6d4-5aa9-11eb-ac5a-a2b22fe0d2dc:0, view# 1: Primary, number of nodes: 1, my index: 0, protocol version 3
+2021-01-19 23:58:44 0 [Note] WSREP: SST complete, seqno: 0
+2021-01-19 23:58:44 0 [Note] InnoDB: Using Linux native AIO
+2021-01-19 23:58:44 0 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2021-01-19 23:58:44 0 [Note] InnoDB: Uses event mutexes
+2021-01-19 23:58:44 0 [Note] InnoDB: Compressed tables use zlib 1.2.11
+2021-01-19 23:58:44 0 [Note] InnoDB: Number of pools: 1
+2021-01-19 23:58:44 0 [Note] InnoDB: Using SSE2 crc32 instructions
+2021-01-19 23:58:44 0 [Note] InnoDB: Initializing buffer pool, total size = 7G, instances = 8, chunk size = 128M
+2021-01-19 23:58:44 0 [Note] InnoDB: Completed initialization of buffer pool
+2021-01-19 23:58:44 0 [Note] InnoDB: If the mysqld execution user is authorized, page cleaner thread priority can be changed. See the man page of setpriority().
+2021-01-19 23:58:44 0 [Note] InnoDB: 128 out of 128 rollback segments are active.
+2021-01-19 23:58:44 0 [Note] InnoDB: Creating shared tablespace for temporary tables
+2021-01-19 23:58:44 0 [Note] InnoDB: Setting file './ibtmp1' size to 12 MB. Physically writing the file full; Please wait ...
+2021-01-19 23:58:44 0 [Note] InnoDB: File './ibtmp1' size is now 12 MB.
+2021-01-19 23:58:44 0 [Note] InnoDB: Waiting for purge to start
+2021-01-19 23:58:44 0 [Note] InnoDB: 10.3.27 started; log sequence number 1625629; transaction id 20
+2021-01-19 23:58:44 0 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
+2021-01-19 23:58:44 0 [Note] Plugin 'FEEDBACK' is disabled.
+2021-01-19 23:58:44 0 [Note] InnoDB: Buffer pool(s) load completed at 210119 23:58:44
+2021-01-19 23:58:44 0 [Note] Server socket created on IP: '130.149.249.145'.
+2021-01-19 23:58:44 0 [Note] Reading of all Master_info entries succeeded
+2021-01-19 23:58:44 0 [Note] Added new Master_info '' to hash table
+2021-01-19 23:58:44 0 [Note] /usr/sbin/mysqld: ready for connections.
+Version: '10.3.27-MariaDB-1:10.3.27+maria~bionic-log'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  mariadb.org binary distribution
+2021-01-19 23:58:44 1 [Note] WSREP: Assign initial position for certification: 0, protocol version: 4
+2021-01-19 23:58:44 0 [Note] WSREP: Service thread queue flushed.
+2021-01-19 23:58:44 1 [Note] WSREP: GCache history reset: 00000000-0000-0000-0000-000000000000:0 -> e153e6d4-5aa9-11eb-ac5a-a2b22fe0d2dc:0
+2021-01-19 23:58:44 1 [Note] WSREP: Synchronized with group, ready for connections

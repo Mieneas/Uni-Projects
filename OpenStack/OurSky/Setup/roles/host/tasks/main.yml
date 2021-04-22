@@ -1,0 +1,47 @@
+- name: install packages via aptitude
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - docker
+      - python3-docker
+      - python3-dev
+      - libffi-dev
+      - gcc
+      - libssl-dev
+    state: latest
+  when: ansible_facts['distribution'] == "Ubuntu"
+- name: "Set owner of /etc/kolla to current user {{ lookup('env','USER') }}"
+  become: yes
+  file:
+    path: /etc/kolla
+    state: directory
+    owner: "{{ lookup('env','USER') }}"
+    owner: "{{ lookup('env','USER') }}"
+- name: Copy necessary configuration files to /etc/kolla
+  copy:
+    src: "{{ item }}"
+    dest: /etc/kolla
+  with_items:
+    - "globals.yml"
+    - "kibana.yml"
+- name: Check if passwords.yml exists
+  stat:
+    path: /etc/kolla/passwords.yml
+  register: password_yml_stat
+- name: Ask for confirmation to continue
+  pause:
+    prompt: Please type "yes" if you want to delete /etc/kolla/passwords.yml
+  register: confirm_delete_passwords_yml
+  when: password_yml_stat.stat.exists
+- name: Delete old passwords.yml if available
+  file:
+    path: /etc/kolla/passwords.yml
+    state: absent
+  when: (not password_yml_stat.stat.exists) or confirm_delete_passwords_yml.user_input | bool
+- name: Copy default passwords.yml from kolla distribution
+  copy:
+    src: "{{ venv_dir }}/share/kolla-ansible/etc_examples/kolla/passwords.yml"
+    dest: /etc/kolla/passwords.yml
+- name: Run kolla-genpwd
+  command: kolla-genpwd

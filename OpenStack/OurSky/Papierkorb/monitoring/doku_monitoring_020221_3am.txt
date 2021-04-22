@@ -1,0 +1,92 @@
+Stand: 2.02.2021 3am.
+
+Vorwort: 
+Wir haben Probleme mit unserem Node wally139, vermutlich weil ich davor drauf mit openstack-ansible gearbeitet habe als wir probleme mit kolla hatten...
+(Reconfigure hat nicht funktioniert für wally139 laut Zead -> meine Frage reconfigure eig. möglich/nötig für Node wally139 ? -> weil Rolle ist Monitoring). Habe erfolglos versucht den Fehler zu finden und habe den Vorschlag den Server nochmal zurückzusetzen.
+Ich warte auf ein Go von meinen Gruppenmitgliedern, bevor ich eine Anfrage an Alex schicke, um den Server zurückzusetzen.
+
+a. Habe die Zeit genutzt mich mit Prometheus einzuarbeiten, unter folgenden Rollen: Localhost:9090->Prometheus | wally139:9100->node_exporter .
+
+b. Habe prometheus.yml konfiguriert und die Rollen gesetzt (siehe a.)
+
+c. Habe mit dem Dashboard gearbeitet und den ersten Graphen für Free Disc Space dargestellt.
+
+d. Habe Grafana unter Prometheus installiert/konfiguriert und habe neue Rolle hinzugefügt: Localhost:3000->Grafana-Server
+
+e. Unter Grafana habe ich eine neue Data Source erstellt mit localhost:9090 url (Prometheus), später auch elasticsearch etc. wie man will.
+
+f. Habe mir aus dem Interenet paar Dashboards gezogen um Daten zu visualisieren (siehe screenshot)
+
+Ausblick: 
+a. Nachdem der Server zurückgesetzt wurde alles destroyen und mit neuer konfiguration (prometheus, elasticsearch, ..) deployen.
+
+b. Die Rollen für alle setzen unter prometheus.yml -> wahrscheinlich schon automatisch via .js datei ?
+
+c. Data Sources mit Grafana erstellen für Prometheus und Elasticsearch
+
+d. Daten von allen Nodes visualisieren... Fertig mit der Aufgabe von dieser Woche
+
+e. Zusatz: Alerts setzen, Third-party-apps visualisieren etc...
+
+f. self-healing ??
+
+
+Dashboards siehe Screenshots.
+
+
+Steps: 
+
+1. wget https://github.com/prometheus/prometheus/releases/download/v2.6.1/prometheus-2.6.1.linux-amd64.tar.gz
+
+2. entpacken
+
+3. ./prometheus
+
+4. Dashboard http://localhost:9090/graph
+
+
+---------Node exporter auf wally139----------------
+
+5. wget https://github.com/prometheus/node_exporter/releases/download/v0.17.0/node_exporter-0.17.0.linux-amd64.tar.gz
+
+6. entpacken
+
+7. ./node_exporter
+
+8. Dashboard http://wally139.cit.tu-berlin.de:9100/
+
+---------Konfiguriere yml auf prometheus und gebe alle node_exporter an-------------------------
+
+9. prometheus.yml (siehe screenshot) (
+rolen definiert, später mehr aber jetzt nur zum testen mit node_exporter und prometheus als rolle... Warte auf deploy von prometheus via kolla)
+
+10. lasse node_exporter laufen
+
+
+---------Im Dashboard-------------------
+
+11. Bsp.: gebe freie diskspace an von wally: node_filesystem_free_bytes{mountpoint="/"}
+
+
+---------Grafana auf Prometheus-----------------
+
+12. wget https://dl.grafana.com/oss/release/grafana-5.4.3.linux-amd64.tar.gz
+
+13. entpacken
+
+14. cd grafana-5.4.3/
+
+15. Server starten : ./bin/grafana-server
+
+16. http://localhost:3000/login   user:admin  pw:admin
+
+17. bad gateway fehler wenn ich prometheus als resource übergeben will, vllt mit elasticsearch testen fehler vllt an localhost????
+	-->Gelöst: Problem war, dass grafana lief, aber habe vergessen prometheus wieder laufen zu lassen ^^
+
+18. import full dashboard: 1860
+
+19. dashboard metric: 405
+
+20. dasboard 3662
+
+

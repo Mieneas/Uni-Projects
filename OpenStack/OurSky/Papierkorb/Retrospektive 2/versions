@@ -1,0 +1,8 @@
+Ansible:			2.9.16 (local using apt-get)
+kolla-ansible:		11.0.0 (local using pip)
+
+python3:			3.6.9
+GCC davon:			8.4.0
+
+python:				2.7.17
+GCC davon:			7.5.0

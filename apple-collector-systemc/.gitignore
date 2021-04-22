@@ -1,0 +1,9 @@
+CMakeCache.txt
+Makefile
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+ha2.dSYM/
+.vscode/
+.DS_Store

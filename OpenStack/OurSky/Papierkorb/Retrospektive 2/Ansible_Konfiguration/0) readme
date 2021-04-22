@@ -1,0 +1,8 @@
+	1) main.yaml befindet sich in:
+		file location: /home/ziad/Studium/Praktikum_VS/VM/share/kolla-ansible/ansible/roles/neutron/defaults/main.yml
+
+	2) Zwei Sachen müssen in multinode Datei geändert werden:
+		1) Pfad zu id_rsa.
+		2) lokaler Passwort.
+
+	3) Vergiss nicht kolla-genpwd auszuführen.

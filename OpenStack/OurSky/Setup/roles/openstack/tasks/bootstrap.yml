@@ -1,0 +1,26 @@
+- name: echo wally wally_id
+  ansible.builtin.debug:
+    msg: 'This is wally {{ wally_id }}!'
+- name: ensure NTP is active
+  become: yes
+  become_method: sudo
+  service:
+    name: ntp
+    enabled: true
+- name: delete wrong netplan files
+  become: yes
+  file:
+    path: /etc/netplan/01-netcfg.yml
+    state: absent
+- name: copy netplan config
+  become: yes
+  template:
+    src: netplan.yml.j2
+    dest: /etc/netplan/01-netcfg.yaml
+- name: apply netplan config
+  become: yes
+  command:
+    cmd: netplan apply
+- name: Echo something
+  debug:
+    msg: "HELLO NODE! {{ wally_id }}"

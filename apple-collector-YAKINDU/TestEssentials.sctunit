@@ -1,0 +1,1371 @@
+testclass TestEssentials for statechart apple_collector {
+
+/* Das sind die Testfälle für das Basisverhalten vom Roboter.
+ * Sie sind die Mindestanforderungen an euer Modell.
+ * Wenn euer Modell alle hier aufgeführten Testfälle besteht, bekommt ihr mindestens 8 Punkte.
+ * Wenn euer Modell nicht alle hier aufgehführten Testfälle besteht, bekommt ihr 0 Punkte.
+ */
+
+	
+	@Test //test1
+	/* Wir testen, ob wir den Roboter über das Bedienpanel einschalten können.
+	 * -Der Bauer kann den Roboter jederzeit über ein Eingabepanel ein-und ausschalten (btn_start, btn_stop):
+	 * -Wenn der Roboter angeschaltet wird, sendet er das Signal (on).
+	 */
+	operation testTurnOn() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test2
+	/* Wir testen, ob wir den Roboter über das Bedienpanel ausschalten können.
+	 * -Der Bauer kann den Roboter jederzeit über ein Eingabepanel ein-und ausschalten (btn_start, btn_stop):
+	 */
+	operation testTurnOff() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Panel.btn_stop					//Über Panel den Roboter ausschalten
+		
+		raise Direction_Sensor.go_straight		//Roboter sollte jetzt wieder aus sein
+		raise Direction_Sensor.turn_left		//und sich nicht bewegen können
+		assert !Lights.blink_left				//BLINK_LEFT sollte deshalb nicht gesendet werden
+		
+		exit
+	}
+
+	@Test //test3
+	/* Wir testen, ob wir den Roboter ohne Akku anschalten können.
+	 * -Wenn der Ladestand weniger als 10% beträgt, kann der Roboter nicht eingeschaltet werden. Drückt der Bauer dann also trotzdem auf den Einschaltknopf, wird dies ignoriert.
+	 */
+	operation testTurnOnWithoutBattery() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert !Lights.on						//Roboter sollte nicht an sein und ON nicht senden
+		
+		exit
+	}
+	
+	@Test //test4
+	/* Wir testen, ob der Roboter nach 10s fahren eine Linkskurve fahren kann.
+	 * -Ist der Roboter eingeschaltet, befindet er sich in einem von vier Bewegungsmodi: {Stehen, Fahrt nach vorne, Linkskurve, Rechtskurve}.
+	 * -Der Roboter erfährt über einen Richtungssensor, wie er sich bewegen soll. Immer wenn der Roboter seine Bewegungsrichtung ändern soll, sendet der Richtungssensor einmalig ein entsprechendes Signal
+	 */
+	operation testTurnLeft() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		proceed 10s								//10s warten
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve senden
+		assert Lights.blink_left				//Roboter sollte BLINK_LEFT senden
+		
+		exit
+	}
+	
+	@Test //test5
+	/* Wir testen, ob der Roboter nach 10s fahren eine Rechtskurve fahren kann.
+	 * -Ist der Roboter eingeschaltet, befindet er sich in einem von vier Bewegungsmodi: {Stehen, Fahrt nach vorne, Linkskurve, Rechtskurve}.
+	 * -Der Roboter erfährt über einen Richtungssensor, wie er sich bewegen soll. Immer wenn der Roboter seine Bewegungsrichtung ändern soll, sendet der Richtungssensor einmalig ein entsprechendes Signal
+	 */
+	operation testTurnRight() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s auf laden; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		proceed 10s								//10s wartennicht 
+		raise Direction_Sensor.turn_right		//Befehl zur Rechtskurve senden
+		assert Lights.blink_right				//Roboter sollte BLINK_RIGHT senden
+		
+		exit
+	}
+	
+	@Test //test6
+	/* Wir testen, ob der Roboter in den Notfallmodus geht und anhält
+	 * -Wenn ein Lebewesen den Weg blockiert, sendet der Richtungssensor augenblicklich das Signal blocked. Dann muss der Roboter sofort in den Notfallmodus gehen (danger_lights).
+	 */
+	operation testHaltOnGoStraight() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		raise Direction_Sensor.blocked			//Warnsignal senden
+		assert Lights.danger_lights				//DANGER_LIGHTS sollte gesendet werden
+		
+		proceed 78s //47ml						//nach 78 sekunden bei normaler Fahrt ist der Tank auf 47ml
+		assert !Lights.low_fuel					//wenn der Roboter weiter fährt sollte LOW_FUEL gesendet werden
+												//Weil der Roboter nicht weiter fahren sollte, sollte 
+		exit									//LOW_FUEL nicht gesendet werden
+	}
+
+ 	@Test //test7
+ 	/* Wir testen, ob das Timing für niedrige Äpfel stimmt.
+	 * -Der Roboter fährt seinen Saugarm aus, bis er den vom Sensor wahrgenommenen Apfel erreicht hat. Da die Äpfel unterschiedlich hoch hängen, dauert das Ausfahren unterschiedlich lange:
+	 * -Niedrige Äpfel: 1 Sekunde
+	 */
+	operation testLowAppleTiming() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		raise Apple_Sensor.apple_harvested		//Apfel löst sich vom Baum
+		proceed 1s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test8
+	/* Wir testen, ob das Timing für hohe Äpfel stimmt.
+	 * -Der Roboter fährt seinen Saugarm aus, bis er den vom Sensor wahrgenommenen Apfel erreicht hat. Da die Äpfel unterschiedlich hoch hängen, dauert das Ausfahren unterschiedlich lange:
+	 * -Hohe Äpfel: 5 Sekunden
+	 */
+	operation testHighAppleTiming() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_high			//hohen Apfel wahrnehmen
+		proceed 5s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		raise Apple_Sensor.apple_harvested		//Apfel löst sich vom Baum
+		proceed 5s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test9
+	/* Wir testen, ob das Timing für sehr hohe Äpfel stimmt.
+	 * -Der Roboter fährt seinen Saugarm aus, bis er den vom Sensor wahrgenommenen Apfel erreicht hat. Da die Äpfel unterschiedlich hoch hängen, dauert das Ausfahren unterschiedlich lange:
+	 * -Sehr hohe Äpfel: 8 Sekunden
+	 */
+	operation testVeryHighAppleTiming() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_very_high		//sehr hohen Apfel wahrnehmen
+		proceed 8s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		raise Apple_Sensor.apple_harvested		//Apfel löst sich vom Baum
+		proceed 8s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test10
+	/* Wir testen, ob mit zu wenig Akku der Erntevorgang für niedrige Äpfel versucht wird.
+	 * -Beträgt der Ladestand weniger als 50%, ignoriert der Roboter hohe und sehr hohe Äpfel. Beträgt der Ladestand weniger als 25%, ignoriert der Roboter zusätzlich auch niedrige Äpfel.
+	 */
+	operation testLowAppleNotEnoughBattery() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 30s aufladen; Akku = 25%
+		proceed 15s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//hohen Apfel wahrnehmen
+		proceed 1s								//(theoretisch) Arm ausfahren
+		assert !Lights.vacuum_active			//VACUUM_ACTIVE sollte jetzt nicht gesendet werden
+
+		exit
+	}
+	
+	@Test //test11
+	/* Wir testen, ob mit zu wenig Akku der Erntevorgang für hohe Äpfel versucht wird.
+	 * -Beträgt der Ladestand weniger als 50%, ignoriert der Roboter hohe und sehr hohe Äpfel. Beträgt der Ladestand weniger als 25%, ignoriert der Roboter zusätzlich auch niedrige Äpfel.
+	 */
+	operation testHighAppleNotEnoughBattery() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 30s aufladen; Akku = 50%
+		proceed 30s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_high			//hohen Apfel wahrnehmen
+		proceed 5s								//(theoretisch) Arm ausfahren
+		assert !Lights.vacuum_active			//VACUUM_ACTIVE sollte jetzt nicht gesendet werden
+		
+		exit
+	}
+	
+	@Test //test12
+	/* Wir testen, ob mit zu wenig Akku der Erntevorgang für sehr hohe Äpfel versucht wird.
+	 * -Beträgt der Ladestand weniger als 50%, ignoriert der Roboter hohe und sehr hohe Äpfel. Beträgt der Ladestand weniger als 25%, ignoriert der Roboter zusätzlich auch niedrige Äpfel.
+	 */
+	operation testVeryHighAppleNotEnoughBattery() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 30s aufladen; Akku = 50%
+		proceed 30s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten */
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_very_high		//hohen Apfel wahrnehmen
+		proceed 8s								//(theoretisch) Arm ausfahren
+		assert !Lights.vacuum_active			//VACUUM_ACTIVE sollte jetzt nicht gesendet werden
+		
+		exit
+	}
+	
+	@Test //test13
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für niedrige Äpfel stimmt.
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Niedrige Äpfel: 1% Akku
+	 */
+	operation testAppleLowBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 18s aufladen; Akku = 30%
+		proceed 18s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 29%
+		assert Lights.low_battery				//Bei 29% Akku LOW_BATTERY senden
+		
+		exit
+	}
+	
+	@Test //test14
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für hohe Äpfel stimmt.
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Hohe Äpfel: 6% Akku
+	 */
+	operation testAppleHighBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 33s aufladen; Akku = 55%
+		proceed 33s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_high			//hohen Apfel wahrnehmen
+		proceed 5s								//Arm ausfahren; kostet 6% Akku, also nach 5s 49%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 6s								//6 Sekunden saugen kostet 20%, also jetzt 29% Akku
+		assert Lights.low_battery				//LOW_BATTERY sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	
+	@Test //test15
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für sehr hohe Äpfel stimmt.
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Sehr hohe Äpfel: 11% Akku
+	 */
+	operation testAppleVeryHighBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 33s aufladen; Akku = 55%
+		proceed 33s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_very_high		//sehr hohen Apfel wahrnehmen
+		proceed 8s								//Arm ausfahren; kostet 11% Akku, also nach 8s 44%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 4300ms							//4.3 Sekunden saugen kostet 15%, also jetzt 29% Akku
+		raise Apple_Sensor.apple_harvested		//Apfel wurde eingesogen
+		assert Lights.low_battery				//LOW_BATTERY sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test16
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für niedrige Äpfel stimmt (beim Einfahren).
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Niedrige Äpfel: 1% Akku
+	 */
+	operation testAppleLowBatteryConsumptionOnWayDown() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 42s aufladen; Akku = 70%
+		proceed 42s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 69%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 64%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 63%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 62%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 57%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 56%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 55%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 50%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 49%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 48%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 43%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 42%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 41%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2300ms							//2.3 Sekunden saugen; kostet 10% Akku, also 31%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 30%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 29%
+		assert Lights.low_battery				//Akku < 30%; LOW_BATTERY sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test17
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für hohe Äpfel stimmt (beim Einfahren).
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Hohe Äpfel: 6% Akku
+	 */
+	operation testAppleHighBatteryConsumptionOnWayDown() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 48s aufladen; Akku = 80%
+		proceed 48s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_high			//hohen Apfel wahrnehmen
+		proceed 5s								//Arm ausfahren; kostet 6% Akku, also nach 1s 74%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 69%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 5s								//Arm einfahren; kostet 6% Akku, also 63%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 62%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 57%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 56%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 55%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 50%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 49%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 48%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 43%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 42%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 41%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2300ms							//1.3 Sekunden saugen; kostet 10% Akku, also 31%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 29%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		assert Lights.low_battery				//Akku < 30%; LOW_BATTERY sollte jetzt gesendet werden
+		
+		exit
+	}
+	 
+	@Test //test18
+	/* Wir testen, ob der Akkuverbrauch für den Erntevorgang für hohe Äpfel stimmt (beim Einfahren).
+	 * -Die insgesamt verbrauchte Energie zum Aus- oder Einfahren des Saugarms ist jeweils identisch und richtet sich nach der Höhe des zu pflückenden Apfels:
+	 * -Sehr hohe Äpfel: 11% Akku
+	 */
+	operation testAppleVeryHighBatteryConsumptionOnWayDown() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 54s aufladen; Akku = 90%
+		proceed 54s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_very_high		//sehr hohen Apfel wahrnehmen
+		proceed 8s								//Arm ausfahren; kostet 11% Akku, also nach 1s 79%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 74%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 8s								//Arm einfahren; kostet 11% Akku, also 63%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 62%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 57%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 56%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 55%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 50%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 49%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 48%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3 Sekunden saugen; kostet 5% Akku, also 43%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 42%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 41%
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2300ms							//1.3 Sekunden saugen; kostet 10% Akku, also 31%
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren; kostet 1% Akku, also 30%
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1% Akku, also nach 1s 29%
+		assert Lights.low_battery				//Akku < 30%; LOW_BATTERY sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test19
+	/* Wir testen, ob der/das Timeout beim Erntevorgang funktioniert
+	 * -Konnte der Roboter nach 6 Sekunden Saugzeit den Apfel nicht ernten, bricht er den Vorgang ab und fährt den Arm ebenfalls ein.
+	 */
+	operation testAppleHarvestingTimout() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 6s								//6s warten und auf timeout warten
+		proceed 1s								//Arm wieder einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test20
+	/* Wir testen, ob das Timing für <2s Ernte geht.
+	 * -Hat der Saugarm den Apfel erreicht, startet er den Saugvorgang (vacuum_active). Die Dauer des Saugvorgangs variiert, da die Äpfel unterschiedlich fest am Baum sitzen.
+	 * -Hat der Saugarm den Apfel erfolgreich geerntet, erhält der Roboter das Signal apple_harvested.
+	 * -Die Dauer des Einfahrens entspricht in beiden Fällen der Dauer des Ausfahrens.
+	 * -Hat der Roboter den Arm eingefahren, beendet er den Erntemodus. Dazu sendet er das Signal vacuum_idle
+	 */
+	operation testAppleHarvestingEasy() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1300ms							//1.3s saugen
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test21
+	/* Wir testen, ob das Timing für <4s Ernte geht.
+	 * -Hat der Saugarm den Apfel erreicht, startet er den Saugvorgang (vacuum_active). Die Dauer des Saugvorgangs variiert, da die Äpfel unterschiedlich fest am Baum sitzen.
+	 * -Hat der Saugarm den Apfel erfolgreich geerntet, erhält der Roboter das Signal apple_harvested.
+	 * -Die Dauer des Einfahrens entspricht in beiden Fällen der Dauer des Ausfahrens.
+	 * -Hat der Roboter den Arm eingefahren, beendet er den Erntemodus. Dazu sendet er das Signal vacuum_idle
+	 */
+	operation testAppleHarvestingHard() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden */
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2300ms							//2.3s saugen
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test22
+	/* Wir testen, ob das Timing für <6s Ernte geht.
+	 * -Hat der Saugarm den Apfel erreicht, startet er den Saugvorgang (vacuum_active). Die Dauer des Saugvorgangs variiert, da die Äpfel unterschiedlich fest am Baum sitzen.
+	 * -Hat der Saugarm den Apfel erfolgreich geerntet, erhält der Roboter das Signal apple_harvested.
+	 * -Die Dauer des Einfahrens entspricht in beiden Fällen der Dauer des Ausfahrens.
+	 * -Hat der Roboter den Arm eingefahren, beendet er den Erntemodus. Dazu sendet er das Signal vacuum_idle
+	 */
+	operation testAppleHarvestingVeryHard() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 4300ms							//4.3s saugen
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		proceed 1s								//Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test23
+	/* Wir testen, ob der Akkuverbrauch für die <2s ernte stimmt.
+	 * -Die verbrauchte Energie während des Saugvorgangs richtet sich nach dessen Dauer:
+	 * -Weniger als 2 Sekunden: 5% Akku
+	 */
+	operation testAppleHarvestingEasyBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 21s aufladen; Akku = 35%
+		proceed 21s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1%, jetzt noch 34% Akku
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 1s								//1s saugen; kostet 5%, jetzt noch 29% Akku
+		raise Apple_Sensor.apple_harvested		//Apfel wurde eingesaugt
+		assert Lights.low_battery				//Akku utner 30%; LOW_BATTERY sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test24
+	/* Wir testen, ob der Akkuverbrauch für die <4s ernte stimmt.
+	 * -Die verbrauchte Energie während des Saugvorgangs richtet sich nach dessen Dauer:
+	 * -Zwischen 2 (inkl.) und 4 (exkl.) Sekunden: 10% Akku
+	 */
+	operation testAppleHarvestingHardBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 24s aufladen; Akku = 40%
+		proceed 24s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1%, jetzt noch 39% Akku
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2300ms							//2.3s saugen; kostet 10%, jetzt noch 29% Akku
+		raise Apple_Sensor.apple_harvested		//Apfel wurde eingesaugt
+		assert Lights.low_battery				//Akku utner 30%; LOW_BATTERY sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	/* Wir testen, ob der Akkuverbrauch für die <6s ernte stimmt.
+	 * -Die verbrauchte Energie während des Saugvorgangs richtet sich nach dessen Dauer:
+	 * -Zwischen 4 (inkl.) und 6 (exkl.) Sekunden: 15% Akku
+	 */
+	@Test //test 25
+	operation testAppleHarvestingVeryHardBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 27s aufladen; Akku = 45%
+		proceed 27s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1%, jetzt noch 44% Akku
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 4s								//2s saugen; kostet 15%, jetzt noch 29% Akku
+		raise Apple_Sensor.apple_harvested		//Apfel wurde eingesaugt
+		assert Lights.low_battery				//Akku utner 30%; LOW_BATTERY sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test26
+	/* Wir testen, ob der Akkuverbrauch für den/das timeout stimmt.
+	 * -Die verbrauchte Energie während des Saugvorgangs richtet sich nach dessen Dauer:
+	 * -6 Sekunden: 20% Akku 
+	 */
+	operation testAppleHarvestingTimeoutBatteryConsumption() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 30s aufladen; Akku = 50%
+		proceed 30s 
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren senden
+		
+		raise Apple_Sensor.apple_low			//niedrigen Apfel wahrnehmen
+		proceed 1s								//Arm ausfahren; kostet 1%, jetzt noch 49% Akku
+		assert Lights.vacuum_active				//VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 6s								//2s saugen; kostet 20%, jetzt noch 29% Akku
+		assert Lights.low_battery				//Akku utner 30%; LOW_BATTERY sollte jetzt gesendet werden
+				
+		exit
+	}
+	
+	@Test //test27
+	/* Wir testen, die fully_charged Kontrolllampe
+	 * -Am Ladekabel erhöht sich der Akkustand alle 3 Sekunden um 5%. 
+	 * -Wenn der Akku durch das Ladekabel vollständig aufgeladen wurde, soll der Roboter einmalig das Signal fully_charged senden. 
+	 * -Dieses Signal soll auch gesendet werden, wenn der Roboter ausgeschaltet ist.
+	 */
+	operation testFullyChargeFromCable() {
+		enter
+		
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s 
+		assert Lights.fully_charged				//FULLY_CHARGED sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test28
+	/* Wir testen, ob der Treibstoffverbrauch im stehen stimmt.
+	 * -Während der Fahrt verbraucht der Motor alle 3 Sekunden 2ml Treibstoff. Im Stand verbraucht der Motor alle 3 Sekunden 1ml Treibstoff.
+	 */
+	operation testFuelConsumptionWhileStanding() {
+		enter
+		
+		raise Tank.add_fuel_100ml				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		
+		proceed 153s							//153s warten um auf 47ml Treibstoff zu kommen
+		assert Lights.low_fuel					//LOW_FUEL sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test29
+	/* Wir testen, ob der Treibstoffverbrauch im Fahren stimmt. Außerdem Testen wir, ob das Auffüllen mit 10ml korrekt funktioniert
+	 * -Während der Fahrt verbraucht der Motor alle 3 Sekunden 2ml Treibstoff. Im Stand verbraucht der Motor alle 3 Sekunden 1ml Treibstoff.
+	 * -Der Bauer kann den Tank jederzeit auffüllen. Dazu verwendet er beliebig Kanister mit 10ml (add_fuel_10ml) und 100ml (add_fuel_100ml) Treibstoffinhalt.
+	 */
+	operation testTankEmpty10ml() {
+		enter
+		
+		raise Tank.add_fuel_10ml 				//10ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradesaus fahren geben
+		proceed 12s 							//Nach 12s sollten 8ml Treibstoff verbraucht sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert Lights.blink_left				//BLINK_LEFT sollte hier gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren
+		proceed 3300ms							//Treibstoff sollte nach 3s leer sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert !Lights.blink_left				//BLINK_LEFT sollte hier nicht gesendet werden
+		
+		exit
+	}
+	
+	@Test //test30
+	/* Wir testen, ob der Treibstoffverbrauch im Fahren stimmt. Außerdem Testen wir, ob das Auffüllen mit 100ml korrekt funktioniert
+	 * -Während der Fahrt verbraucht der Motor alle 3 Sekunden 2ml Treibstoff. Im Stand verbraucht der Motor alle 3 Sekunden 1ml Treibstoff.
+	 * -Der Bauer kann den Tank jederzeit auffüllen. Dazu verwendet er beliebig Kanister mit 10ml (add_fuel_10ml) und 100ml (add_fuel_100ml) Treibstoffinhalt.
+	 */
+	operation testTankEmpty100ml() {
+		enter
+		
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradesaus fahren geben
+		
+		proceed 147s							//Nach 147s sollten 98ml Treibstoff verbraucht sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert Lights.blink_left				//BLINK_LEFT sollte hier gesendet werden
+        raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren
+		proceed 3300ms							//Treibstoff sollte nach 3s leer sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert !Lights.blink_left				//BLINK_LEFT sollte hier nicht gesendet werden
+		
+		exit
+	}
+	
+	@Test //test31
+	/* Wir testen, ob der Treibstoffverbrauch im Fahren stimmt. Außerdem Testen wir, ob das das vollständige Auffüllen mit 100ml funktioniert
+	 * -Der Roboter lagert Treibstoff in einem integriertem Tank. Der Tank kann maximal 500ml Treibstoff auf einmal halten. Zu Beginn ist der Tank leer.
+	 * -Während der Fahrt verbraucht der Motor alle 3 Sekunden 2ml Treibstoff. Im Stand verbraucht der Motor alle 3 Sekunden 1ml Treibstoff.
+	 * -Der Bauer kann den Tank jederzeit auffüllen. Dazu verwendet er beliebig Kanister mit 10ml (add_fuel_10ml) und 100ml (add_fuel_100ml) Treibstoffinhalt.
+	 */
+	operation testTankEmpty500ml() {
+		enter
+		
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen; wir haben jetzt 500ml
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradesaus fahren geben
+		
+		proceed 747s							//Nach 747s sollten 498ml Treibstoff verbraucht sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert Lights.blink_left				//BLINK_LEFT sollte hier gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradeaus fahren
+		proceed 3300ms							//Treibstoff sollte nach 3s leer sein
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert !Lights.blink_left				//BLINK_LEFT sollte hier nicht gesendet werden
+		
+		exit
+	}
+	
+	@Test //test32
+	/* Wir testen, ob das Warnsignal LOW_FUEL korrekt funktioniert.
+	 * -Wenn der Tankinhalt unter 50ml fällt, soll das Signal low_fuel gesendet werden.
+	 */
+	operation testTankLowFuel() {
+		enter
+		
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradesaus fahren geben
+		
+		proceed 78s 							//78s warten um auf 47ml Treibstoff zu kommen
+		assert Lights.low_fuel					//LOW_FUEL sollte jetzt gesendet werden
+		
+		exit
+	}
+	
+	@Test //test33
+	/* Wir testen, ob der Roboter sich ausschaltet und DONE sendet, wenn er 100 Äpfel gesammelt hat.
+	 * -Hat der Roboter 100 Äpfel geerntet, ist sein Stauraum voll. Dann schaltet er sich aus und sendet das Signal done.
+	 */
+	operation testCollect100Apples() {
+		enter
+		
+		raise Tank.add_fuel_100ml 				//100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				//200ml
+		raise Tank.add_fuel_100ml 				//300ml
+		raise Tank.add_fuel_100ml 				//400ml
+		raise Tank.add_fuel_100ml				//500ml	Tank ist voll
+		raise Charger.plug_in					//für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					//Über Panel den Roboter anschalten
+		assert Lights.on						//ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		//Befehl zum geradesaus fahren geben
+		
+		var i: integer = 0						//Laufvariable für Schleife
+		while (i < 99) {						//In Schleife wird ein Apfel geerntet. Wir brauchen 100 Äpfel, also 100 Iterationen
+			raise Apple_Sensor.apple_low		//niedrigen Apfel wahrnehmen
+			proceed 1s							//Arm ausfahren
+			raise Apple_Sensor.apple_harvested	//Apfel einsaugen
+			proceed 1s							//Arm einfahren
+			raise Direction_Sensor.go_straight	//Befehl zum geradeaus fahren senden
+			proceed 120s						//ein bisschen weiterfahren, um den Akku wieder aufzuladen
+			raise Tank.add_fuel_100ml			//Treibstoff nachfüllen, damit der Tank nicht leer wird
+			raise Tank.add_fuel_100ml
+			raise Tank.add_fuel_100ml
+			raise Tank.add_fuel_100ml
+			raise Tank.add_fuel_100ml
+				
+			i = i + 1
+		}
+		raise Apple_Sensor.apple_low			//letzter Apfel
+		proceed 1s								//Arm ausfahren
+		raise Apple_Sensor.apple_harvested		//Apfel einsaugen
+		
+		assert Lights.done						//DONE sollte jetzt gesendet werden
+		
+		proceed 5s								//kurz warten
+		raise Direction_Sensor.turn_left		//Befehl zur Linkskurve geben
+		assert !Lights.blink_left				//BLINK_LEFT sollte hier nicht gesendet werden (weil der Roboter aus sein sollte)
+		
+		exit
+	}
+
+// *********************************************************************************************
+// EDGE CASES
+// *********************************************************************************************
+
+
+// (a) Keine Reaktion auf Richtungssignale, während geerntet wird.
+
+@Test //test 1
+
+// Während der Roboter erntet, steht er und sollte nicht auf Signale des Richtungssensors reagieren.
+
+operation testDirectionIgnoredWhileHarvesting() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					// Über Panel den Roboter anschalten
+		assert Lights.on						// ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		// Befehl zum geradesaus fahren geben
+		
+		raise Apple_Sensor.apple_low            // Apfel entdeckt
+		raise Direction_Sensor.turn_left      	// Signal zum Abbiegen nach links senden - sollte ignoriert werden
+		
+		assert !Lights.blink_left				// BLINK_LEFT sollte hier nicht gesendet werden (weil der Roboter gerade erntet)
+		
+		exit		
+	
+	}
+	
+// (b) TANK: wenn der Tank leer ist, schaltet der Roboter sich automatisch aus.
+
+// (b.1) Wird der Roboter eingeschaltet, wenn der Tank leer ist, so schaltet er sich sofort wieder aus.
+
+@Test//test 2
+
+ operation testSwitchOnWithEmptyTank() {
+	
+	enter
+	
+	raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+	proceed 60s
+	raise Charger.plug_out
+	
+	raise Panel.btn_start					// Über Panel den Roboter anschalten
+	assert Lights.on						// ON sollte jetzt gesendet werden
+											
+											// Nun stellt das Fuel-Management fest, dass der Tank leer ist
+											// und sendet das Signal 'robot_finished' --> der Roboter schaltet
+											// sich aus
+											
+	raise Direction_Sensor.turn_left		// Sende nun Signal zum Links-Abbiegen; dies sollte ohne Ergebnis bleiben,
+											// da der Roboter sich selbstständig ausgeschaltet hat
+	assert !Lights.blink_left				// BLINK_LEFT sollte hier nicht gesendet werden (weil der Roboter aus ist)
+	
+	exit		
+	
+	}
+	
+// (b.2) Sinkt der Tank während der Fahrt auf 0, schaltet sich der Roboter automatisch aus.
+
+@Test//test 3
+
+ operation testAutomaticSwitchOffWhenTankEmpty() {
+	
+	enter
+	raise Tank.add_fuel_10ml				// 10 ml Benzin einfüllen
+	raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+	proceed 60s
+	raise Charger.plug_out
+	
+	raise Panel.btn_start					// Über Panel den Roboter anschalten
+	assert Lights.on						// ON sollte jetzt gesendet werden
+											
+	raise Direction_Sensor.go_straight		// Geradeaus fahren: alle 3 Sekunden 2ml Treibstoff verbraucht
+	
+	proceed 15s								// 5*2ml Treibstoff verbrauchen --> Tank leer
+	
+											// Nun stellt das Fuel-Management fest, dass der Tank leer ist
+											// und sendet das Signal 'robot_finished' --> der Roboter schaltet
+											// sich aus
+											
+	raise Direction_Sensor.turn_left		// Sende nun Signal zum Links-Abbiegen; dies sollte ohne Ergebnis bleiben,
+											// da der Roboter sich selbstständig ausgeschaltet hat
+	assert !Lights.blink_left				// BLINK_LEFT sollte hier nicht gesendet werden (weil der Roboter aus ist)
+	
+	exit		
+	
+	}
+	
+// (c) "Wird der Roboter während eines Erntevorgangs ausgeschaltet, wird der Erntevorgang wie gewohnt 
+//     abgeschlossen. 
+//     Anschließend werden Motor und Sensoren deaktiviert."
+
+@Test //test 4
+
+// Off Button während Erntevorgang Drücken --> Erntevorgang abschließen, dann ausschalten
+
+operation testOffButtonWhileHarvesting() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out
+		raise Panel.btn_start					// Über Panel den Roboter anschalten
+		assert Lights.on						// ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		// Befehl zum geradeaus fahren geben
+		
+		proceed 2 s								// Ein Stück geradeaus fahren
+		raise Apple_Sensor.apple_low            // Apfel entdeckt
+	
+		proceed 1s								// Arm ausfahren; kostet 1%, jetzt noch 99% Akku
+		assert Lights.vacuum_active				// VACUUM_ACTIVE sollte jetzt gesendet werden
+		
+		// Off-button während Erntevorgang drücken
+		raise Panel.btn_stop
+		
+		// Erntevorgang sollte wie gewohnt abgeschlossen werden
+		proceed 1300ms							//1.3s saugen
+		raise Apple_Sensor.apple_harvested	    // Apfel einsaugen
+		proceed 1s							    // Arm einfahren
+		assert Lights.vacuum_idle				//VACUUM_IDLE sollte jetzt gesendet werden
+		
+		// Nun sollte sich der Roboter ausschalten; 
+		// über eine ausbleibende Reaktion auf ein Richtungssignal kann geprüft werden, dass
+		// er aus ist.
+		
+		//proceed 1 s
+		
+		// Gebe Befehl, nach rechts zu fahren
+		raise Direction_Sensor.turn_right
+				
+		assert !Lights.blink_right				// BLINK_RIGHT sollte hier nicht gesendet werden (weil der Roboter gerade erntet)
+		
+		exit
+	
+	}
+	
+// (d) Ladekabel
+/*
+ * Der Roboter kann Laden wenn er steht und an oder aus ist (also auch im Erntemodus!).
+ * 
+ * Beim Wechsel von "Ein" nach "Aus" und zurück sollte weiter geladen werden, wenn das Kabel angeschlossen ist.
+ * 
+ * Einschalten darf nicht möglich sein, wenn der letzte Bewegungszustand vor Ausschalten Geradeaus, Linkskurve 
+ * oder Rechtskurve war und das Kabel steckt (ob der Roboter in einem dieser Zustände ist bzw. war, bevor er
+ * ausgeschaltet wurde, wird in der Variable 'R_state' gespeichert).
+ */	
+ 
+ // (d.1) Laden im Erntemodus
+ 
+ @Test//test 5
+ 
+ operation testChargingWhileHarvesting() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 30s aufladen; Akku = 50%
+		proceed 30s//60
+		raise Charger.plug_out
+		raise Panel.btn_start					// Über Panel den Roboter anschalten
+		assert Lights.on						// ON sollte jetzt gesendet werden
+		raise Direction_Sensor.go_straight		// Befehl zum geradeaus fahren geben
+		
+		proceed 2 s								// Ein Stück geradeaus fahren
+		raise Apple_Sensor.apple_low      		// Apfel entdeckt
+		
+		// !!!!! LADEN WÄHREND ERNTEVORGANG !!!!!!!
+		raise Charger.plug_in					// Kabel einstecken
+												// Während des 4-Sekunden-Erntevorgangs 
+												// (1s Saugarm ausfahren, 2s Saugen, 1s
+												// Saugarm einfahren) soll nun
+												// also 1*5 = 5% Batterie aufgeladen werden
+												// (alle 3 Sekunden +5%);
+												// verbraucht werden 12% (2% für Ein- und Ausfahren
+												// des Saugarms, 10% für das Saugen)
+												// Verbrauch insgesamt: 7%
+	
+		proceed 1s								// Arm ausfahren; kostet 1%
+		assert Lights.vacuum_active				// VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2s							    // 2 s saugen
+		raise Apple_Sensor.apple_harvested	    // Apfel einsaugen
+		proceed 1s							    // Arm einfahren
+		assert Lights.vacuum_idle				// VACUUM_IDLE sollte jetzt gesendet werden
+
+		// Nun befindet sich der Roboter im Stehen und lädt weiter. 
+		// Nach (9 -> 36) Sekunden sollte er wieder voll aufgeladen sein
+		proceed 35s								// 35 + 1 = (36/3)*5 = 60 und 60 + 43 = 103 also 100%. Jetzt ist die Batarry voll.
+		assert Lights.fully_charged
+		raise Charger.plug_out
+			
+		exit
+	
+	}
+	
+// (d.2) Wechsel von "Aus/Charging" zu "Ein[Stehen]/Charging"
+
+ @Test//test 6
+ 
+ operation testChargingTransitionOffOn() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 57s aufladen; Akku = 95%
+		proceed 57s
+		
+		raise Panel.btn_start
+		
+		proceed 3s								// weitere 3s laden; Akku = 100%
+		assert Lights.fully_charged
+			
+		exit
+	
+	}
+	
+// (d.3) Wechsel von "Ein[Stehen]/Charging" zu "Aus/Charging"
+
+ @Test//test 7
+ 
+ operation testChargingTransitionOnOff() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 54s aufladen; Akku = 90%
+		proceed 54s
+		
+		raise Panel.btn_start
+		
+		proceed 3s								// weitere 3s laden; Akku = 95%
+		
+		raise Panel.btn_stop
+		
+		proceed 3s 								// weitere 3s laden; Akku = 100%
+		
+		assert Lights.fully_charged
+			
+		exit
+	
+	}
+	
+// (d.4) Einschalten nicht möglich, wenn Roboter zuletzt in einem der Bewegungs-Zustände Geradeaus/Rechtskurve/Linkskurve
+//		 war und das Kabel eingesteckt ist
+
+ 
+ @Test//test 8
+ 
+ operation testNoReturnToMotionHistoryWithCable() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+		proceed 60s
+		raise Charger.plug_out	
+		
+		raise Panel.btn_start					// Einschalten
+		
+		raise Direction_Sensor.go_straight		// Geradeaus fahren
+		
+		proceed 5s								// Ein bisschen fahren
+		
+		raise Panel.btn_stop					// Ausschalten
+		
+		raise Charger.plug_in					// Laden
+		
+		raise Panel.btn_start					// Wieder Einschalten
+		
+		assert !Lights.on						// Einschalten sollte nicht möglich sein,
+												// wenn 'R_state' == 1 und 'cabel' == 1
+			
+		exit
+	
+	}
+	
+// (d.5) Wechsel von Harvesting[Charging] in Bewegungsmodus nicht möglich
+
+ 
+ @Test//test 9
+ 
+ operation testNoReturnToMotionFromHarvestingWithCable() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Tank.add_fuel_100ml 				// 200ml
+		raise Tank.add_fuel_100ml 				// 300ml
+		raise Tank.add_fuel_100ml 				// 400ml
+		raise Tank.add_fuel_100ml				// 500ml	Tank ist voll
+		raise Charger.plug_in					// für 30s aufladen; Akku = 50%
+		proceed 30s
+		raise Charger.plug_out	
+		
+		raise Panel.btn_start					// Einschalten
+		
+		raise Direction_Sensor.go_straight		// Geradeaus fahren
+		
+		proceed 2 s								// Ein Stück geradeaus fahren
+		raise Apple_Sensor.apple_low      		// Apfel entdeckt
+		
+		raise Charger.plug_in					// Kabel einstecken
+
+		proceed 1s								// Arm ausfahren; kostet 1%
+		assert Lights.vacuum_active				// VACUUM_ACTIVE sollte jetzt gesendet werden
+		proceed 2s							    // 2 s saugen
+		raise Apple_Sensor.apple_harvested	    // Apfel einsaugen
+		proceed 1s							    // Arm einfahren
+		assert Lights.vacuum_idle				// VACUUM_IDLE sollte jetzt gesendet werden
+
+		// Nun befindet sich der Roboter im Stehen und lädt weiter. 
+		// Da er an das Kabel angeschlossen ist, sollte er nicht auf ein Bewegungssignal reagieren.
+		
+		// Gebe Befehl, nach rechts zu fahren
+		raise Direction_Sensor.turn_right
+				
+		assert !Lights.blink_right				// BLINK_RIGHT sollte hier nicht gesendet werden (weil der Roboter gerade erntet)
+		
+
+		raise Charger.plug_out
+			
+		exit
+	}
+
+ 
+ //Hier teste ich die Funktionalität von History.
+ 
+ @Test//test 10
+ 
+ operation testHistoryFunctionality() {
+	
+	enter
+	
+	raise Tank.add_fuel_100ml 					// 100ml Treibstoff auffüllen
+		raise Charger.plug_in					// für 60s aufladen; Akku = 100%
+		proceed 20s
+		raise Charger.plug_out	
+		
+		raise Panel.btn_start					// Einschalten
+		
+		raise Direction_Sensor.turn_left		// Links abbiegen
+		
+		proceed 5s								// Ein bisschen waretn
+		
+		raise Panel.btn_stop					// Ausschalten
+		
+		raise Panel.btn_start					// Wieder Einschalten
+		
+		
+		assert Lights.blink_left				// Linkes Licht muss jetzt blinken.
+			
+		exit
+	
+	}
+}
+

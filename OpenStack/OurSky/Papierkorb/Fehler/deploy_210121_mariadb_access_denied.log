@@ -1,0 +1,47 @@
+<wally135.cit.tu-berlin.de> SSH: EXEC ssh -vvv -C -o ControlMaster=auto -o ControlPersist=60s -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no -o ConnectTimeout=10 -o ControlPath=/home/jonathan/.ansible/cp/ef0c306c6a wally135.cit.tu-berlin.de '/bin/sh -c '"'"'rm -f -r /home/jonathan/.ansible/tmp/ansible-tmp-1611225976.7844028-181809-49232020538563/ > /dev/null 2>&1 && sleep 0'"'"''
+<wally135.cit.tu-berlin.de> (0, b'', b"OpenSSH_8.4p1, OpenSSL 1.1.1i  8 Dec 2020\r\ndebug1: Reading configuration data /home/jonathan/.ssh/config\r\ndebug1: /home/jonathan/.ssh/config line 13: Applying options for *.cit.tu-berlin.de\r\ndebug1: Reading configuration data /etc/ssh/ssh_config\r\ndebug3: expanded UserKnownHostsFile '~/.ssh/known_hosts' -> '/home/jonathan/.ssh/known_hosts'\r\ndebug3: expanded UserKnownHostsFile '~/.ssh/known_hosts2' -> '/home/jonathan/.ssh/known_hosts2'\r\ndebug1: auto-mux: Trying existing master\r\ndebug2: fd 3 setting O_NONBLOCK\r\ndebug2: mux_client_hello_exchange: master version 4\r\ndebug3: mux_client_forwards: request forwardings: 0 local, 0 remote\r\ndebug3: mux_client_request_session: entering\r\ndebug3: mux_client_request_alive: entering\r\ndebug3: mux_client_request_alive: done pid = 180309\r\ndebug3: mux_client_request_session: session request sent\r\ndebug1: mux_client_request_session: master session id: 2\r\ndebug3: mux_client_read_packet: read header failed: Broken pipe\r\ndebug2: Received exit status from master 0\r\n")
+FAILED - RETRYING: Waiting for MariaDB service to be ready through VIP (6 retries left).Result was: {
+    "attempts": 1,
+    "changed": false,
+    "cmd": [
+        "docker",
+        "exec",
+        "mariadb",
+        "mysql",
+        "-h",
+        "130.149.249.145",
+        "-P",
+        "3306",
+        "-u",
+        "haproxy",
+        "-e",
+        "show databases;"
+    ],
+    "delta": "0:00:00.152569",
+    "end": "2021-01-21 11:46:18.832187",
+    "invocation": {
+        "module_args": {
+            "_raw_params": "docker exec mariadb mysql -h 130.149.249.145 -P 3306 -u haproxy -e 'show databases;'",
+            "_uses_shell": false,
+            "argv": null,
+            "chdir": null,
+            "creates": null,
+            "executable": null,
+            "removes": null,
+            "stdin": null,
+            "stdin_add_newline": true,
+            "strip_empty_ends": true,
+            "warn": true
+        }
+    },
+    "msg": "non-zero return code",
+    "rc": 1,
+    "retries": 7,
+    "start": "2021-01-21 11:46:18.679618",
+    "stderr": "ERROR 1045 (28000): Access denied for user 'haproxy'@'wally135.cit.tu-berlin.de' (using password: NO)",
+    "stderr_lines": [
+        "ERROR 1045 (28000): Access denied for user 'haproxy'@'wally135.cit.tu-berlin.de' (using password: NO)"
+    ],
+    "stdout": "",
+    "stdout_lines": []
+}

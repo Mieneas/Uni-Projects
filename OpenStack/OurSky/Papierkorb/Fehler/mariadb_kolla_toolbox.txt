@@ -1,0 +1,39 @@
+TASK [mariadb : Running MariaDB bootstrap container] ************************************************************************
+[WARNING]: The value False (type bool) in a string field was converted to 'False' (type string). If this does not look like
+what you expect, quote the entire value to ensure it does not change.
+changed: [wally135.cit.tu-berlin.de]
+
+TASK [mariadb : Store bootstrap host name into facts] ***********************************************************************
+ok: [wally135.cit.tu-berlin.de]
+
+TASK [mariadb : include_tasks] **********************************************************************************************
+skipping: [wally135.cit.tu-berlin.de]
+
+RUNNING HANDLER [mariadb : Starting first MariaDB container] ****************************************************************
+changed: [wally135.cit.tu-berlin.de]
+
+RUNNING HANDLER [mariadb : Wait for first MariaDB service port liveness] ****************************************************
+FAILED - RETRYING: Wait for first MariaDB service port liveness (10 retries left).
+ok: [wally135.cit.tu-berlin.de]
+
+RUNNING HANDLER [mariadb : Wait for first MariaDB service to sync WSREP] ****************************************************
+ok: [wally135.cit.tu-berlin.de]
+
+RUNNING HANDLER [mariadb : Creating haproxy mysql user] *********************************************************************
+fatal: [wally135.cit.tu-berlin.de]: FAILED! => {"changed": false, "msg": "kolla_toolbox container is not running."}
+
+RUNNING HANDLER [mariadb : Restart MariaDB on existing cluster members] *****************************************************
+
+RUNNING HANDLER [mariadb : Start MariaDB on new nodes] **********************************************************************
+
+RUNNING HANDLER [mariadb : Ensure MariaDB is running normally on bootstrap host] ********************************************
+
+RUNNING HANDLER [Restart mariadb-clustercheck container] ********************************************************************
+
+NO MORE HOSTS LEFT **********************************************************************************************************
+
+PLAY RECAP ******************************************************************************************************************
+localhost                  : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+wally135.cit.tu-berlin.de  : ok=29   changed=19   unreachable=0    failed=1    skipped=8    rescued=0    ignored=1   
+wally141.cit.tu-berlin.de  : ok=10   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+wally142.cit.tu-berlin.de  : ok=10   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

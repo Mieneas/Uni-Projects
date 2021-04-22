@@ -1,0 +1,15 @@
+127.0.0.1 localhost
+#127.0.1.1	wally135.cit.tu-berlin.de	wally135
+10.0.42.135      controller
+10.0.42.141      compute1
+10.0.42.142      compute2
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+# BEGIN ANSIBLE GENERATED HOSTS
+10.0.42.135 wally135
+10.0.42.141 wally141
+10.0.42.142 wally142
+# END ANSIBLE GENERATED HOSTS

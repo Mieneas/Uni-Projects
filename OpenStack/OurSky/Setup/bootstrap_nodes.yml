@@ -1,0 +1,6 @@
+- hosts:
+    - control
+    - monitoring
+    - compute
+  roles:
+    - openstack
