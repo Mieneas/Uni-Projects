@@ -4,4 +4,4 @@ Ziel dieser Aufgabe ist es, die Berechnungen für ein mittels Raytracing generie
 Die Funktionen zur Erzeugung des Bildes (Pixel-Daten) sind bereits vorgegeben. Die Aufgabe besteht
 darin, ein Programm zu schreiben, das die zu berechnenden Pixel sinnvoll auf mehrere Prozesse aufteilt
 und die Bildbereiche anschließend wieder zu einem Gesamtbild zusammenzufügt. bearbeitet ist nur die
-Datei main.c.
+Datei main.c
