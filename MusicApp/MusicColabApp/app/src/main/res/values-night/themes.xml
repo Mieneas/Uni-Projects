@@ -1,0 +1,23 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.MusicColab" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <!--Leiste oben/buttons etc.-->
+        <item name="colorPrimary">@color/grey</item>
+        <!--handy statusleiste.-->
+        <item name="colorPrimaryVariant">@color/black</item>
+        <!--text auf buttons.-->
+        <item name="colorOnPrimary">@color/lightlighttgrey</item>
+        <!-- Secondary brand color. -->
+        <!-- "aktiv" farbe. -->
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/purple_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:colorBackground">@color/darkgrey</item>
+        <item name="android:textColor">@color/lightlighttgrey</item>
+        <!-- Hide the Action Bar -->
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>
